@@ -23,13 +23,21 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: 
       - name: Extract Source ZIP
         run: |
-         ZIP_FILE=$(find . -type f -iname '*.zip' | head -n 1)
+          ZIP_FILE=$(find . -type f -iname '*.zip' -not -path './.git/*' | head -n 1)
+
+          if [ -z "$ZIP_FILE" ]; then
             echo "Source ZIP not found!"
+            find . -maxdepth 4 -type f -print
             exit 1
           fi
+
+          echo "Found source: $ZIP_FILE"
+          mkdir -p project
           unzip -o "$ZIP_FILE" -d project
+
 
       - name: Build JAR
         run: gradle -p project/marzz-client build --no-daemon
