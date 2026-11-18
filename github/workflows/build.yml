@@ -25,8 +25,7 @@ jobs:
 
       - name: Extract Source ZIP
         run: |
-          ZIP_FILE=$(find . -maxdepth 1 -type f -iname '*Full*Storage*ESP*.zip' | head -n 1)
-          if [ -z "$ZIP_FILE" ]; then
+         ZIP_FILE=$(find . -maxdepth 1 -type f -iname '*.zip' | head -n 1)
             echo "Source ZIP not found!"
             exit 1
           fi
