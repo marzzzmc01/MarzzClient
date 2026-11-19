@@ -20,22 +20,17 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
       - name: Find and Extract Source ZIP
         shell: bash
         run: |
           set -euo pipefail
-
           ZIP_FILE="$(find . -type f -iname '*.zip' -not -path './.git/*' -print -quit)"
           if [ -z "$ZIP_FILE" ]; then
-            echo "::error::Source ZIP not found."
+            echo "::error::Source ZIP not found"
             find . -maxdepth 4 -type f -print
             exit 1
           fi
-
-          echo "Found ZIP: $ZIP_FILE"
+          echo "Using source archive: $ZIP_FILE"
           mkdir -p project
           unzip -o "$ZIP_FILE" -d project
 
@@ -43,29 +38,25 @@ jobs:
           if [ -z "$BUILD_FILE" ]; then
             BUILD_FILE="$(find project -type f -name 'build.gradle.kts' -print -quit)"
           fi
-
           if [ -z "$BUILD_FILE" ]; then
-            echo "::error::No Gradle build file found in extracted ZIP."
+            echo "::error::Gradle build file was not found in extracted source."
             find project -maxdepth 5 -type f -print
             exit 1
           fi
-
           PROJECT_DIR="$(dirname "$BUILD_FILE")"
           echo "Project directory: $PROJECT_DIR"
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+
+      - name: Setup Gradle 8.14
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.14'
 
       - name: Build JAR
         shell: bash
         run: |
           set -euo pipefail
-          if [ -f "$PROJECT_DIR/gradlew" ]; then
-            chmod +x "$PROJECT_DIR/gradlew"
-            "$PROJECT_DIR/gradlew" -p "$PROJECT_DIR" build --no-daemon
-          else
-            echo "::error::Gradle wrapper (gradlew) not found in project directory: $PROJECT_DIR"
-            find "$PROJECT_DIR" -maxdepth 3 -type f -print
-            exit 1
-          fi
+          gradle -p "$PROJECT_DIR" build --no-daemon
 
       - name: Upload JAR
         uses: actions/upload-artifact@v4
