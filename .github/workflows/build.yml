@@ -20,6 +20,11 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      - name: Setup Gradle 9.2.0
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.2.0'
+
       - name: Find and Extract Source ZIP
         shell: bash
         run: |
@@ -46,11 +51,6 @@ jobs:
           PROJECT_DIR="$(dirname "$BUILD_FILE")"
           echo "Project directory: $PROJECT_DIR"
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
-
-      - name: Setup Gradle 8.14
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.14'
 
       - name: Build JAR
         shell: bash
